@@ -1,0 +1,11 @@
+{application, synapse,
+ [
+  {description, "State Machine inference interface and API"},
+  {vsn, ""},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
