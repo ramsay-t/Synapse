@@ -12,8 +12,13 @@ learn_test_() ->
     }.
 
 learn1() ->
+    Traces = synapse_stamina:read_trace_file("../test/test1.traces"),
+    SM = synapse:learn(Traces,[]),
+    ?assert(synapse_sm:sanity_check(SM)).
+
+learn2() ->
     Traces = synapse_stamina:read_trace_file("../test/test2.traces"),
-    SM = synapse:learn(Traces,#learner_metainfo{module=locker}),
+    SM = synapse:learn(Traces,[]),
     ?assert(synapse_sm:sanity_check(SM)),
     %% State names are not fixed, but they can be defined based on
     %% walks.

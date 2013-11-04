@@ -1,5 +1,5 @@
 -module(synapse).
--export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/2]).
+-export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/3]).
 
 -export([trace_server/4]).
 
@@ -10,7 +10,7 @@
 	EventSource :: fun(() -> event()), 
 	TraceEnd :: fun((event()) -> false | include | exclude)
 		    ) -> list(trace()).
-get_traces(EventSource, TraceEnd) ->
+get_traces(_EventSource, _TraceEnd) ->
     %% FIXME content
     [].
 
@@ -22,7 +22,7 @@ get_traces(EventSource, TraceEnd) ->
 	EventSource :: fun(() -> event()), 
 	TraceEnd :: fun((event()) -> false | include | exclude)
 		    ) -> ok | {error, string()}.
-get_live_traces(EventSource,TraceEnd) ->
+get_live_traces(_EventSource,_TraceEnd) ->
     %% FIXME content
     ok.
 
@@ -33,12 +33,7 @@ get_live_traces(EventSource,TraceEnd) ->
 	MetaInfo :: learner_metainfo()
 		    ) -> statemachine().
 learn(Learner,Traces,MetaInfo) ->
-    case is_supported(Learner) of
-	false ->
-	    {error,"Learner not supported",Learner,{"Supported Learners",supported_learners()}};
-	_ ->
-	    erlang:apply(list_to_atom("synapse_" ++ atom_to_list(Learner)),learn,[Traces,MetaInfo])
-    end.
+    run_learner_function(Learner,learn,[Traces,MetaInfo]).
 
 %% @doc Learn from a set of traces, using the default learner backend.
 -spec learn(
@@ -46,25 +41,25 @@ learn(Learner,Traces,MetaInfo) ->
 	MetaInfo :: learner_metainfo()
 		    ) -> statemachine().
 learn(Traces,MetaInfo) ->
-    learn(default_learner(),MetaInfo).
+    learn(default_learner(),Traces,MetaInfo).
 
 %% @doc Determine the difference between two state machines.
 -spec diff(
-	First :: statemachine(),
-	Second :: statemachine()
+	SM1 :: statemachine(),
+	SM2 :: statemachine(),
+	MetaInfo :: learner_metainfo()
 		  ) -> statemachinedifference().
-diff(First, Second) ->
-    %% FIXME content
-    #statemachinedifference{
-       	  added_transitions = [],
-	  deleted_transitions = [],
-	  added_states = [],
-	  deleted_states = [],
-	  name_mapping_1 = [],
-	  name_mapping_2 = []
-      }.
-		   
+diff(SM1, SM2, MetaInfo) ->
+    diff(default_learner(),SM1,SM2,MetaInfo).
 
+-spec diff(
+	Learner :: learner_backend(),
+	SM1 :: statemachine(),
+	SM2 :: statemachine(),
+	MetaInfo :: learner_metainfo()
+		    ) -> statemachinedifference().
+diff(Learner, SM1, SM2, MetaInfo) ->
+    run_learner_function(Learner,diff,[SM1,SM2,MetaInfo]).
 
 %% Internal functions and server functions
 %% @private
@@ -94,7 +89,7 @@ supported_learners() ->
     [statechum].
 
 is_supported(L) ->
-    is_supported(L,supported_learners).
+    is_supported(L,supported_learners()).
 
 is_supported(_L,[]) ->
     false;
@@ -105,3 +100,11 @@ is_supported(L,[_ | Ls]) ->
 
 default_learner() ->
     statechum.
+
+run_learner_function(Learner,Function,Args) ->
+    case is_supported(Learner) of
+	false ->
+	    {error,"Learner not supported",Learner,{"Supported Learners",supported_learners()}};
+	_ ->
+	    erlang:apply(list_to_atom("synapse_" ++ atom_to_list(Learner)),Function,Args)
+    end.

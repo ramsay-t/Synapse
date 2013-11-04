@@ -38,14 +38,10 @@
 	  name_mapping_2 :: list({state(),state()})
 	 }).
 
-%% @doc Meta-info to be provided to the backend learners.
--record(learner_metainfo,{
-	  module :: atom()
-	 }).
-
 %% @doc Type synonym for the state machine record.
 -type statemachine() :: #statemachine{}.
 %% @doc Type synonym for the state machine difference record.
 -type statemachinedifference() :: #statemachinedifference{}.
-%% @doc Type synonym for the learner_metainfo record.
--type learner_metainfo() :: #learner_metainfo{}.
+
+%% @doc Learner metainfo consists of key,value pairs.
+-type learner_metainfo() :: list({atom(), any()}).

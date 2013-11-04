@@ -70,7 +70,7 @@ sanity_check(#statemachine{
 	Alphabet = get_alphabet(Trans),
 	[IS] = lists:filter(fun(E) -> E =:= IS end, States),
 	true
-    catch error:{badmatch,V} ->
+    catch error:{badmatch,_} ->
 	    false
     end.
 	    
