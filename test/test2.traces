@@ -1,0 +1,8 @@
++ init lock read/0
++ init lock write(wibble) read/wibble
+- init lock write(wibble) read/0
++ init lock unlock read/0
+- init write(wibble)
++ init lock write(wibble) unlock read/wibble
++ init lock write(wibble) unlock lock read/wibble
++ init lock write(wibble) unlock lock write(0) unlock read/0

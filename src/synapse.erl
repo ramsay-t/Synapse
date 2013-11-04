@@ -1,5 +1,5 @@
 -module(synapse).
--export([get_traces/2,get_live_traces/2,learn/2,diff/2]).
+-export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/2]).
 
 -export([trace_server/4]).
 
@@ -27,19 +27,26 @@ get_live_traces(EventSource,TraceEnd) ->
     ok.
 
 %% @doc Learn from a set of traces, using the specified learner backend.
-%% Currently only statechum is supported as a backend.
 -spec learn(
 	Learner :: learner_backend(),
+	Traces :: list(trace()),
 	MetaInfo :: learner_metainfo()
 		    ) -> statemachine().
-learn(Learner,MetaInfo) ->
-    %% FIXME content
-    #statemachine{
-       states = [],
-       transitions = [],
-       initial_state = 1,
-       alphabet = []
-      }.
+learn(Learner,Traces,MetaInfo) ->
+    case is_supported(Learner) of
+	false ->
+	    {error,"Learner not supported",Learner,{"Supported Learners",supported_learners()}};
+	_ ->
+	    erlang:apply(list_to_atom("synapse_" ++ atom_to_list(Learner)),learn,[Traces,MetaInfo])
+    end.
+
+%% @doc Learn from a set of traces, using the default learner backend.
+-spec learn(
+	Traces :: list(trace()),
+	MetaInfo :: learner_metainfo()
+		    ) -> statemachine().
+learn(Traces,MetaInfo) ->
+    learn(default_learner(),MetaInfo).
 
 %% @doc Determine the difference between two state machines.
 -spec diff(
@@ -80,3 +87,21 @@ trace_server(EventSource, TraceEnd, Receiver, CurrentTrace) ->
 	_ ->
 	    trace_server(EventSource, TraceEnd, Receiver, [Event | CurrentTrace])
     end.
+
+
+
+supported_learners() ->
+    [statechum].
+
+is_supported(L) ->
+    is_supported(L,supported_learners).
+
+is_supported(_L,[]) ->
+    false;
+is_supported(L,[L | _]) ->
+    true;
+is_supported(L,[_ | Ls]) ->
+    is_supported(L,Ls).
+
+default_learner() ->
+    statechum.

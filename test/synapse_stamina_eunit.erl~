@@ -1,0 +1,4 @@
+-module(synapse_stamina_eunit).
+
+-include_lib("eunit/include/eunit.hrl").
+
