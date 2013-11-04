@@ -1,5 +1,5 @@
 -module(synapse).
--export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/3]).
+-export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/3,supported_learners/0]).
 
 -export([trace_server/4]).
 
