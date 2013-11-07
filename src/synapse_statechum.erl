@@ -40,7 +40,15 @@ display_progress() ->
     end.
 
 find_statechum() ->
-    %% FIXME get the statechum PID...
-    pass.
+    case synapselauncher:find_statechum() of
+	not_started ->
+	    {ok,StateChumOpts} = file:consult("statechum.conf"),
+	    synapselauncher:startStatechum(StateChumOpts);
+	PID ->
+	    PID
+    end.
+
+	    
+
 
 				
