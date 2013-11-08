@@ -6,20 +6,30 @@
 -compile([export_all]).
 
 learn_test_() ->
-    {"Test learning of a simple example",
-     {inorder,
-      [
-       {test, ?MODULE, learn1}
-       ,{test, ?MODULE, learn1}
-      ]}
+    {setup,
+     fun() ->
+	     synapse:load_config("../synapse.conf")
+     end,
+     {"Test learning of a simple example",
+      {inorder,
+       [
+	{test, ?MODULE, learn1}
+	,{test, ?MODULE, learn1}
+       ]}
+     }
     }.
 
 unsupported_learner_test_() ->
-    {"Check learner support",
-     {inorder,
-      [
-       {test,?MODULE,unsupported}
-      ]}
+    {setup,
+     fun() ->
+	     synapse:load_config("../synapse.conf")
+     end,
+     {"Check learner support",
+      {inorder,
+       [
+	{test,?MODULE,unsupported}
+       ]}
+     }
     }.
 
 unsupported() ->
