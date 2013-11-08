@@ -34,14 +34,18 @@
 	  deleted_transitions :: list(transition()),
 	  added_states :: list(state()),
 	  deleted_states :: list(state()),
-	  name_mapping_1 :: list({state(),state()}),
-	  name_mapping_2 :: list({state(),state()})
+	  name_mapping :: list({state(),state()}),
+	  initial_state :: state()
+	 }).
+
+%% @doc Meta-info to be provided to the backend learners.
+-record(learner_metainfo,{
+	  module :: atom()
 	 }).
 
 %% @doc Type synonym for the state machine record.
 -type statemachine() :: #statemachine{}.
 %% @doc Type synonym for the state machine difference record.
 -type statemachinedifference() :: #statemachinedifference{}.
-
-%% @doc Learner metainfo consists of key,value pairs.
--type learner_metainfo() :: list({atom(), any()}).
+%% @doc Type synonym for the learner_metainfo record.
+-type learner_metainfo() :: #learner_metainfo{}.

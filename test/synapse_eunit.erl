@@ -14,33 +14,28 @@ learn_test_() ->
       ]}
     }.
 
-learner_tests_() ->
-    {"Test the StateChum learner explicitly",
-      {inorder,
-       [
-	{test, ?MODULE, statechum_learn1}
-	,{test, ?MODULE, statechum_learn1}
-       ]}
+unsupported_learner_test_() ->
+    {"Check learner support",
+     {inorder,
+      [
+       {test,?MODULE,unsupported}
+      ]}
     }.
+
+unsupported() ->
+    Res = synapse:learn(fake_learner,[],[]),
+    ?assertEqual({error,"Learner not supported",fake_learner,{"Supported Learners",[statechum]}}, Res).
 
 learn1() ->
     Traces = synapse_stamina:read_trace_file("../test/test1.traces"),
-    SM = synapse:learn(Traces,[]),
+    Meta = [{'askQuestions','false'},{'gdFailOnDuplicateNames','false'}],
+    SM = synapse:learn(Traces,Meta),
     ?assert(synapse_sm:sanity_check(SM)).
 
 learn2() ->
     Traces = synapse_stamina:read_trace_file("../test/test2.traces"),
-    SM = synapse:learn(Traces,[]),
-    check2(SM).
-
-statechum_learn1() ->
-    Traces = synapse_stamina:read_trace_file("../test/test1.traces"),
-    SM = synapse:learn(statechum,Traces,[]),
-    ?assert(synapse_sm:sanity_check(SM)).
-
-statechum_learn2() ->
-    Traces = synapse_stamina:read_trace_file("../test/test2.traces"),
-    SM = synapse:learn(statechum,Traces,[]),
+    Meta = [{'askQuestions','false'},{'gdFailOnDuplicateNames','false'}],
+    SM = synapse:learn(Traces,Meta),
     check2(SM).
 
 check2(SM) ->

@@ -65,13 +65,15 @@ sanity_check_4() ->
 					  ,alphabet=[wibble]
 					 })).
 sanity_check_5() ->
-    ?assertNot(synapse_sm:sanity_check(#statemachine{
+    %% Alphabet can be a superset
+    ?assert(synapse_sm:sanity_check(#statemachine{
 					  states=[a,b,c]
 					  ,transitions=[{a,wibble,b},{b,wobble,c}]
 					  ,initial_state=a
 					  ,alphabet=[wibble,wobble,waggle]
 					 })).
 sanity_check_6() ->
+    %% States can be a superset
     ?assert(synapse_sm:sanity_check(#statemachine{
 					  states=[a,b,c,d,e]
 					  ,transitions=[{a,wibble,b},{b,wobble,c}]

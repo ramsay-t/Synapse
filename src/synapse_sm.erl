@@ -59,6 +59,7 @@ sanity_check(#statemachine{
 	       }) ->
     try
 	SubStates = get_states(Trans),
+	%% The reported states must be a super-set of those used in the transitions
 	lists:map(fun(S) -> 
 			  [S] = lists:filter(fun(SS) -> 
 						     SS =:= S 
@@ -66,8 +67,14 @@ sanity_check(#statemachine{
 					     States) 
 		  end, 
 		  SubStates),
-	io:format("~p vs ~p~n",[Alphabet,get_alphabet(Trans)]),
-	Alphabet = get_alphabet(Trans),
+	%% The reported alphabet must be a superset of those used in the transitions
+	lists:map(fun(A) ->
+			  [A] = lists:filter(fun(SS) -> 
+						     SS =:= A
+					     end,
+					     Alphabet) 
+		  end,
+		  get_alphabet(Trans)),
 	[IS] = lists:filter(fun(E) -> E =:= IS end, States),
 	true
     catch error:{badmatch,_} ->

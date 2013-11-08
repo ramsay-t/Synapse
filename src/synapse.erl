@@ -1,5 +1,12 @@
 -module(synapse).
--export([get_traces/2,get_live_traces/2,learn/3,learn/2,diff/3,supported_learners/0]).
+-export([
+	 get_traces/2,get_live_traces/2
+	 ,learn/3,learn/2
+	 ,diff/3,diff/4
+	 ,supported_learners/0
+	 ,visualise/1,visualise/3,visualise/4
+	 ,visualise_diff/2,visualise_diff/4,visualise_diff/5
+	]).
 
 -export([trace_server/4]).
 
@@ -60,6 +67,55 @@ diff(SM1, SM2, MetaInfo) ->
 		    ) -> statemachinedifference().
 diff(Learner, SM1, SM2, MetaInfo) ->
     run_learner_function(Learner,diff,[SM1,SM2,MetaInfo]).
+
+-spec visualise(
+	SM :: statemachine()
+	      ) -> ok.		       
+visualise(SM) ->
+    visualise(default_learner(), SM, [], 'FSM').
+
+-spec visualise(
+	SM :: statemachine(),
+	MetaInfo :: learner_metainfo(),
+	WindowName :: atom()
+		      ) -> ok.		       
+visualise(SM, MetaInfo, WindowName) ->
+    visualise(default_learner(), SM, MetaInfo, WindowName).
+
+-spec visualise(
+	Learner :: learner_backend(),
+	SM :: statemachine(),
+	MetaInfo :: learner_metainfo(),
+	WindowName :: atom()
+		      ) -> ok.		       
+visualise(Learner, SM, MetaInfo, WindowName) ->
+    run_learner_function(Learner,visualise,[SM,MetaInfo,WindowName]).
+
+-spec visualise_diff(
+	Orig :: statemachine(),
+	Diff :: statemachinedifference()
+	      ) -> ok.		       
+visualise_diff(Orig, Diff) ->
+    visualise_diff(default_learner(),Orig, Diff,[],'Difference').
+
+-spec visualise_diff(
+	Orig :: statemachine(),
+	Diff :: statemachinedifference(),
+	MetaInfo :: learner_metainfo(),
+	WindowName :: atom()
+	      ) -> ok.		       
+visualise_diff(Orig, Diff, MetaInfo, WindowName) ->
+    visualise_diff(default_learner(), Orig, Diff, MetaInfo, WindowName).
+
+-spec visualise_diff(
+	Learner :: learner_backend(),
+	Orig :: statemachine(),
+	Diff :: statemachinedifference(),
+	MetaInfo :: learner_metainfo(),
+	WindowName :: atom()
+	      ) -> ok.		       
+visualise_diff(Learner, Orig, Diff, MetaInfo, WindowName) ->
+    run_learner_function(Learner,visualise_diff,[Orig,Diff,MetaInfo,WindowName]).
 
 %% Internal functions and server functions
 %% @private

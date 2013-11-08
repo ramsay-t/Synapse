@@ -1,3 +1,5 @@
+
+
 all: compile $(OBJS)
 
 compile: deps
@@ -16,7 +18,7 @@ clean:
 	./rebar clean
 
 test:
-	./rebar skip_deps=true eunit
+	ERL_FLAGS="-sname synapse" ./rebar skip_deps=true eunit
 
 .PHONY: test
 
