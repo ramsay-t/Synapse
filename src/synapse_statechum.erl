@@ -57,7 +57,14 @@ display_progress(Ref) ->
     end.
 
 find_statechum() ->
-    OFile = "../statechum.conf",
+    OFile = case synapse:get_config(statechum_conf) of
+		{error, not_found} ->
+		    exit("You must specify a statechum.conf file in your synapse.conf to use statechum.");
+		{error, Other} ->
+		    exit({"There was an error reading the synapse configuration.",Other});
+		File ->
+		    File
+	    end,
     case erlang:module_loaded(synapselauncher) of
 	true ->
 	    case synapselauncher:find_statechum() of

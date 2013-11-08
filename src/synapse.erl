@@ -1,14 +1,15 @@
 -module(synapse).
 -export([
 	 get_traces/2,get_live_traces/2
-	 ,learn/3,learn/2
+	 ,learn/2,learn/3
 	 ,diff/3,diff/4
 	 ,supported_learners/0
 	 ,visualise/1,visualise/3,visualise/4
 	 ,visualise_diff/2,visualise_diff/4,visualise_diff/5
+	 ,load_config/1
 	]).
 
--export([trace_server/4]).
+-export([trace_server/4,conf_server/1,get_config/1]).
 
 -include("synapse.hrl").
 
@@ -33,6 +34,14 @@ get_live_traces(_EventSource,_TraceEnd) ->
     %% FIXME content
     ok.
 
+%% @doc Learn from a set of traces, using the default learner backend.
+-spec learn(
+	Traces :: list(trace()),
+	MetaInfo :: learner_metainfo()
+		    ) -> statemachine().
+learn(Traces,MetaInfo) ->
+    learn(default_learner(),Traces,MetaInfo).
+
 %% @doc Learn from a set of traces, using the specified learner backend.
 -spec learn(
 	Learner :: learner_backend(),
@@ -42,13 +51,6 @@ get_live_traces(_EventSource,_TraceEnd) ->
 learn(Learner,Traces,MetaInfo) ->
     run_learner_function(Learner,learn,[Traces,MetaInfo]).
 
-%% @doc Learn from a set of traces, using the default learner backend.
--spec learn(
-	Traces :: list(trace()),
-	MetaInfo :: learner_metainfo()
-		    ) -> statemachine().
-learn(Traces,MetaInfo) ->
-    learn(default_learner(),Traces,MetaInfo).
 
 %% @doc Determine the difference between two state machines.
 -spec diff(
@@ -140,6 +142,51 @@ trace_server(EventSource, TraceEnd, Receiver, CurrentTrace) ->
     end.
 
 
+conf_server(Conf) ->
+    receive
+	{From, get, Key} ->
+	    case lists:keyfind(Key,1,Conf) of
+		{Key, Value} ->
+		    From ! {conf, Key, Value},
+		    conf_server(Conf);
+		false ->
+		    From ! {conf, error, not_found},
+		    conf_server(Conf);
+		Other ->
+		    From ! {conf, error, Other},
+		    conf_server(Conf)
+	    end;
+	terminate ->
+	    ok
+    end.
+
+get_config(Key) ->
+    find_conf_server() ! {self(),get,Key},
+    receive 
+	{conf, Key, Value} ->
+	    Value;
+	{conf, error, Error} ->
+	    {error, Error}
+    end.
+
+find_conf_server() ->
+    case global:whereis_name(synapse_conf_server) of
+	undefined ->
+	    exit("You must load a Synapse config file with the load_config function.");
+	PID ->
+	    PID
+    end.
+
+load_config(File) ->
+    case global:whereis_name(synapse_conf_server) of
+	undefined ->
+	    {ok, Conf} = file:consult(File),
+	    PID = spawn_link(?MODULE,conf_server,[Conf]),
+	    global:register_name(synapse_conf_server,PID);
+	Server ->
+	    Server ! terminate,
+	    load_config(File)
+    end.
 
 supported_learners() ->
     [statechum].
