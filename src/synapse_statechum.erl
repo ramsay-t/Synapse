@@ -1,6 +1,6 @@
 -module(synapse_statechum).
 
--export([learn/2,diff/3,visualise/3,visualise_diff/4]).
+-export([learn/2,passive_learn/2,diff/3,visualise/3,visualise_diff/4]).
 
 -include("synapse.hrl").
 
@@ -16,6 +16,9 @@ learn(Traces, MetaInfo) ->
     ok = display_progress(Ref),
     StateChum ! {Ref,learn,self()},
     get_final_progress(StateChum,Ref).
+
+passive_learn(Traces,MetaInfo) ->
+    learn(Traces,[{'askQuestions','false'} | MetaInfo]).
 
 diff(SM1, SM2, MetaInfo) ->
     {Ref, StateChum} = get_worker(),

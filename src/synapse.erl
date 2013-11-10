@@ -2,6 +2,7 @@
 -export([
 	 get_traces/2,get_live_traces/2
 	 ,learn/2,learn/3
+	 ,passive_learn/1,passive_learn/2,passive_learn/3
 	 ,diff/3,diff/4
 	 ,supported_learners/0
 	 ,visualise/1,visualise/3,visualise/4
@@ -51,6 +52,32 @@ learn(Traces,MetaInfo) ->
 learn(Learner,Traces,MetaInfo) ->
     run_learner_function(Learner,learn,[Traces,MetaInfo]).
 
+
+%% @doc Learn from a set of traces, without queries, 
+%% using the default learner backend and the default meta_info.
+-spec passive_learn(
+	Traces :: list(trace())
+       ) -> statemachine().
+passive_learn(Traces) ->
+    passive_learn(default_learner(),Traces,[]).
+
+%% @doc Learn from a set of traces, without queries, 
+%% using the default learner backend.
+-spec passive_learn(
+	Traces :: list(trace()),
+	MetaInfo :: learner_metainfo()
+       ) -> statemachine().
+passive_learn(Traces,MetaInfo) ->
+    passive_learn(default_learner(),Traces,MetaInfo).
+
+%% @doc Learn from a set of traces, without queries.
+-spec passive_learn(
+	Learner :: learner_backend(),
+	Traces :: list(trace()),
+	MetaInfo :: learner_metainfo()
+       ) -> statemachine().
+passive_learn(Learner,Traces,MetaInfo) ->
+    run_learner_function(Learner,passive_learn,[Traces,MetaInfo]).
 
 %% @doc Determine the difference between two state machines.
 -spec diff(
