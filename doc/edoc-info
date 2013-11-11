@@ -1,0 +1,3 @@
+{application,synapse}.
+{packages,[]}.
+{modules,[synapse,synapse_sm,synapse_stamina,synapse_statechum]}.
