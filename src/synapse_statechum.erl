@@ -73,7 +73,8 @@ find_statechum() ->
 	    case synapselauncher:find_statechum() of
 		not_started ->
 		    {ok,StateChumOpts} = file:consult(OFile),
-		    synapselauncher:startStatechum(StateChumOpts);
+		    synapselauncher:startStatechum(StateChumOpts),
+		    find_statechum();
 		PID ->
 		    PID
 	    end;
@@ -82,7 +83,8 @@ find_statechum() ->
 	    case lists:keyfind('StatechumDir', 1, StateChumOpts) of
 		{'StatechumDir', SCDir} ->
 		    code:add_path(atom_to_list(SCDir) ++ "/lib/synapse"),
-		    synapselauncher:startStatechum(StateChumOpts);
+		    synapselauncher:startStatechum(StateChumOpts),
+		    find_statechum();
 		_ ->
 		    exit({"Statechum Dir not set in options file.",OFile}) 
 	    end	

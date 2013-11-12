@@ -199,7 +199,13 @@ get_config(Key) ->
 find_conf_server() ->
     case global:whereis_name(synapse_conf_server) of
 	undefined ->
-	    exit("You must load a Synapse config file with the load_config function.");
+	    case filelib:is_file("synapse.conf") of
+		true ->
+		    load_config("synapse.conf"),
+		    find_conf_server();
+		false ->
+		    exit("You must load a Synapse config file with the load_config function.")
+	    end;
 	PID ->
 	    PID
     end.
@@ -208,7 +214,7 @@ load_config(File) ->
     case global:whereis_name(synapse_conf_server) of
 	undefined ->
 	    {ok, Conf} = file:consult(File),
-	    PID = spawn_link(?MODULE,conf_server,[Conf]),
+	    PID = spawn(?MODULE,conf_server,[Conf]),
 	    global:register_name(synapse_conf_server,PID);
 	Server ->
 	    Server ! terminate,

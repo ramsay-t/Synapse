@@ -18,7 +18,7 @@ clean:
 	./rebar clean
 
 test:
-	ERL_FLAGS="-sname synapse" ./rebar skip_deps=true eunit
+	ERL_FLAGS="-sname eunit" ./rebar skip_deps=true eunit
 
 .PHONY: test
 
