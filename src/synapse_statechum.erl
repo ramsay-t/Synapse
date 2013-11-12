@@ -1,6 +1,6 @@
 -module(synapse_statechum).
 
--export([learn/2,passive_learn/2,diff/3,visualise/3,visualise_diff/4]).
+-export([learn/2,passive_learn/2,diff/3,visualise/3,visualise_diff/4,learn_erlang/1,learn_erlang/2]).
 
 -include("synapse.hrl").
 
@@ -19,6 +19,16 @@ learn(Traces, MetaInfo) ->
 
 passive_learn(Traces,MetaInfo) ->
     learn(Traces,[{'askQuestions','false'} | MetaInfo]).
+
+learn_erlang(Module) ->
+    learn_erlang(Module, [{'erlangInitialTraceLength','5'},{'erlangAlphabetAnyElements','ANY_WIBBLE'}]).
+
+learn_erlang(Module,MetaInfo) ->
+    {Ref, StateChum} = get_worker(),
+    StateChum ! {Ref,updateConfiguration,MetaInfo},
+    ok = display_progress(Ref),
+    StateChum ! {Ref,learnErlang,Module,self()},
+    get_final_progress(StateChum,Ref).
 
 diff(SM1, SM2, MetaInfo) ->
     {Ref, StateChum} = get_worker(),
