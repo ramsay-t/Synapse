@@ -1,6 +1,6 @@
 -module(synapse_statechum).
 
--export([learn/2,passive_learn/2,diff/3,visualise/3,visualise_diff/4,learn_erlang/1,learn_erlang/2]).
+-export([learn/2,passive_learn/2,diff/3,visualise/3,visualise/4,visualise_diff/4,learn_erlang/1,learn_erlang/2]).
 
 -include("synapse.hrl").
 
@@ -38,10 +38,13 @@ diff(SM1, SM2, MetaInfo) ->
     get_final_progress(StateChum,Ref).
 
 visualise(SM, MetaInfo, Name) ->
+    visualise(SM,MetaInfo,Name,['N1000']).
+
+visualise(SM, MetaInfo, Name, Ignore) ->
     {Ref, StateChum} = get_worker(),
     StateChum ! {Ref,updateConfiguration,MetaInfo},
     ok = display_progress(Ref),
-    StateChum ! {Ref, displayFSM, SM, Name},
+    StateChum ! {Ref, displayFSM, SM, Name, Ignore},
     get_final_progress(StateChum,Ref).
  
 visualise_diff(Orig, Diff, MetaInfo, Name) ->
@@ -59,14 +62,22 @@ get_final_progress(StateChum, Ref) ->
 display_progress(Ref) ->
     receive
 	{Ref, status, Msg} ->
-	    io:format("Progress: ~p~n", [Msg]),
+	    io:format("Status: ~p~n", [Msg]),
+	    display_progress(Ref);
+	{Ref, status, step, Info} ->
+	    Msg = case Info of
+		      {N} -> io_lib:format("~p states",[N]);
+		      {S,_FSM,Reds} -> io_lib:format("~p states, ~p red states",[S,length(Reds)]);
+		      M -> M
+		      end,
+	    io:format("Progress: ~s~n", [Msg]),
 	    display_progress(Ref);
 	{Ref, ok, Result} ->
 	    Result;
 	{Ref, Result} ->
 	    Result;
 	Other ->
-	    io:format("Unexpected message: ~p~n",[Other])
+	    io:format("Unexpected message <ref:~p>: ~p~n",[Ref,Other])
     end.
 
 find_statechum() ->
@@ -86,6 +97,7 @@ find_statechum() ->
 		    synapselauncher:startStatechum(StateChumOpts),
 		    find_statechum();
 		PID ->
+		    io:format("StateChum at ~p~n",[PID]),
 		    PID
 	    end;
 	_ ->
