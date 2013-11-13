@@ -8,6 +8,7 @@
 	 ,visualise/1,visualise/3,visualise/4
 	 ,visualise_diff/2,visualise_diff/4,visualise_diff/5
 	 ,load_config/1
+	 ,learn_erlang/1
 	]).
 
 -export([trace_server/4,conf_server/1,get_config/1]).
@@ -34,6 +35,16 @@ get_traces(_EventSource, _TraceEnd) ->
 get_live_traces(_EventSource,_TraceEnd) ->
     %% FIXME content
     ok.
+
+%% @doc Learn from an Erlang module.
+%%
+%% This extracts the module interface, generates an initial set of random traces, and then
+%% proceeds with active learning, using the StateChum ErlangOracle.
+-spec learn_erlang(
+	Module :: atom()
+		    ) -> statemachine().
+learn_erlang(Module) ->
+    synapse_statechum:learn_erlang(Module).
 
 %% @doc Learn from a set of traces, using the default learner backend.
 -spec learn(
