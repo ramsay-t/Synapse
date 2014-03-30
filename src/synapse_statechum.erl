@@ -1,6 +1,6 @@
 -module(synapse_statechum).
 
--export([learn/2,passive_learn/2,diff/3,visualise/3,visualise/4,visualise_diff/4,learn_erlang/1,learn_erlang/2]).
+-export([learn/2,passive_learn/2,diff/3,visualise/3,visualise/4,visualise_diff/4,learn_erlang/1,learn_erlang/2,find_statechum/0]).
 
 -include("synapse.hrl").
 
@@ -12,7 +12,7 @@ learn(Traces, MetaInfo) ->
     {Ref, StateChum} = get_worker(),
     StateChum ! {Ref,updateConfiguration,MetaInfo},
     ok = display_progress(Ref),
-    StateChum ! {Ref,traces,Traces},
+    StateChum ! {Ref,traces,atomise_traces(Traces)},
     ok = display_progress(Ref),
     StateChum ! {Ref,learn,self()},
     get_final_progress(StateChum,Ref).
@@ -124,3 +124,17 @@ get_worker() ->
 
 
 				
+%% Helper function to make sure everything passed is atomic
+atomise_traces([]) ->
+    [];
+atomise_traces([{PN,T} | Ts]) ->
+    [{PN,atomise(T)} | atomise_traces(Ts)].
+
+atomise([]) ->
+    [];
+atomise([E | Es]) when is_atom(E) ->
+    [E | atomise(Es)];
+atomise([E | Es]) when is_list(E) ->
+    [list_to_atom(E) | atomise(Es)];
+atomise([E | Es]) ->
+    [list_to_atom(lists:flatten(hd(io_lib:format("~p",[E])))) | atomise(Es)].

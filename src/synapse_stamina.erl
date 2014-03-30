@@ -1,6 +1,6 @@
 -module(synapse_stamina).
 
--export([read_trace_file/1]).
+-export([read_trace_file/1,parse_line/1]).
 
 -include("synapse.hrl").
 
